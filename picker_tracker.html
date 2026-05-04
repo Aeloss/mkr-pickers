@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tracker Pickers</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding-bottom: 90px; /* Space for bottom add button */
+        }
+        .navbar {
+            background-color: #0d6efd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .picker-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+            margin-bottom: 14px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #eaeaea;
+        }
+        .progress-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: rgba(13, 110, 253, 0.08); /* Light blue base */
+            z-index: 0;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .picker-content {
+            position: relative;
+            z-index: 1;
+            padding: 14px 16px;
+        }
+        .picker-name {
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin-bottom: 4px;
+            color: #212529;
+            cursor: pointer;
+        }
+        .stats-badge {
+            font-size: 0.75rem;
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #495057;
+            font-weight: 600;
+            border: 1px solid #dee2e6;
+        }
+        .input-group-custom {
+            display: flex;
+            align-items: center;
+        }
+        .sku-input {
+            width: 65px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 1px solid #ced4da;
+            border-radius: 8px 0 0 8px;
+            height: 46px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .sku-input:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+        }
+        /* Ocultar las flechas del input number */
+        .sku-input::-webkit-outer-spin-button,
+        .sku-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .sku-input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .btn-add-sku {
+            border-radius: 0 8px 8px 0;
+            height: 46px;
+            padding: 0 18px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .floating-add-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background-color: #198754;
+            color: white;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4);
+            border: none;
+            z-index: 1000;
+            transition: transform 0.1s;
+        }
+        .floating-add-btn:active {
+            transform: scale(0.92);
+            background-color: #146c43;
+        }
+        .window-selector {
+            background: white;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 18px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+        }
+        /* Color scale for progress */
+        .load-low { background-color: rgba(25, 135, 84, 0.15); } /* Green: good capacity */
+        .load-medium { background-color: rgba(255, 193, 7, 0.2); } /* Yellow: getting busy */
+        .load-high { background-color: rgba(220, 53, 69, 0.15); } /* Red: high load */
+        
+        .toast-container {
+            z-index: 1055;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+        <div class="container d-flex justify-content-between">
+            <span class="navbar-brand mb-0 h1 fw-bold">
+                <i class="bi bi-cart-check"></i> Tracker Pickers 
+                <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem; vertical-align: middle;">v1.0.0</span>
+            </span>
+            <button class="btn btn-sm btn-outline-light fw-bold" onclick="resetDay()"><i class="bi bi-arrow-clockwise"></i> Reiniciar Día</button>
+        </div>
+    </nav>
+
+    <!-- Window Selector -->
+    <div class="window-selector d-flex justify-content-between align-items-center">
+        <span class="fw-bold text-secondary"><i class="bi bi-clock-history me-1"></i> Ventana:</span>
+        <div class="btn-group shadow-sm" role="group">
+            <input type="radio" class="btn-check" name="windowRadio" id="v1" value="1" autocomplete="off" checked onchange="changeWindow(1)">
+            <label class="btn btn-outline-primary" for="v1">1</label>
+
+            <input type="radio" class="btn-check" name="windowRadio" id="v2" value="2" autocomplete="off" onchange="changeWindow(2)">
+            <label class="btn btn-outline-primary" for="v2">2</label>
+
+            <input type="radio" class="btn-check" name="windowRadio" id="v3" value="3" autocomplete="off" onchange="changeWindow(3)">
+            <label class="btn btn-outline-primary" for="v3">3</label>
+
+            <input type="radio" class="btn-check" name="windowRadio" id="v4" value="4" autocomplete="off" onchange="changeWindow(4)">
+            <label class="btn btn-outline-primary" for="v4">4</label>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container px-3" id="pickers-container">
+        <!-- Pickers will be rendered here -->
+    </div>
+
+    <!-- Floating Add Button -->
+    <button class="floating-add-btn" onclick="openAddPickerModal()">
+        <i class="bi bi-plus"></i>
+    </button>
+
+    <!-- Modal: Add Picker -->
+    <div class="modal fade" id="addPickerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">Añadir Nuevo Picker</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="form-floating mb-2">
+                        <input type="text" id="newPickerName" class="form-control form-control-lg fw-bold" placeholder="Nombre del Picker" autocomplete="off" onkeypress="if(event.key === 'Enter') addPicker()">
+                        <label for="newPickerName">Nombre o Apodo</label>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary fw-bold px-4" onclick="addPicker()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast for notifications -->
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+        <div id="actionToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="toastMessage">
+                    Acción completada.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- STATE MANAGEMENT ---
+        const LS_KEY = 'mkr_picker_tracker_state';
+        
+        let state = {
+            currentWindow: 1,
+            pickers: [] 
+        };
+
+        function loadState() {
+            const saved = localStorage.getItem(LS_KEY);
+            if (saved) {
+                state = JSON.parse(saved);
+                document.getElementById(`v${state.currentWindow}`).checked = true;
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem(LS_KEY, JSON.stringify(state));
+        }
+
+        function showToast(message, type = 'success') {
+            const toastEl = document.getElementById('actionToast');
+            const toastBody = document.getElementById('toastMessage');
+            
+            toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+            toastBody.textContent = message;
+            
+            const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
+            toast.show();
+        }
+
+        // --- CORE LOGIC ---
+        function getPickerTotal(picker) {
+            return (picker.v1 || 0) + (picker.v2 || 0) + (picker.v3 || 0) + (picker.v4 || 0);
+        }
+
+        function getMaxTotal() {
+            if (state.pickers.length === 0) return 1;
+            return Math.max(...state.pickers.map(p => getPickerTotal(p)), 1); // Minimum 1 to avoid division by zero
+        }
+
+        function addPicker() {
+            const nameInput = document.getElementById('newPickerName');
+            const name = nameInput.value.trim();
+            if (!name) return;
+
+            state.pickers.push({
+                id: 'p_' + Date.now(),
+                name: name,
+                v1: 0, v2: 0, v3: 0, v4: 0
+            });
+
+            saveState();
+            nameInput.value = '';
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addPickerModal'));
+            modal.hide();
+            
+            renderPickers();
+            showToast(`Picker ${name} añadido.`);
+        }
+
+        function promptDeletePicker(id) {
+            const picker = state.pickers.find(p => p.id === id);
+            if(picker && confirm(`¿Seguro que deseas eliminar a ${picker.name} de la lista?`)) {
+                state.pickers = state.pickers.filter(p => p.id !== id);
+                saveState();
+                renderPickers();
+                showToast('Picker eliminado.', 'secondary');
+            }
+        }
+
+        function addSKUs(pickerId) {
+            const input = document.getElementById(`input-${pickerId}`);
+            const val = parseInt(input.value);
+            
+            if (isNaN(val) || val <= 0) {
+                input.style.borderColor = '#dc3545'; // red
+                input.style.backgroundColor = '#fff8f8';
+                setTimeout(() => {
+                    input.style.borderColor = '#ced4da';
+                    input.style.backgroundColor = 'white';
+                }, 500);
+                return;
+            }
+
+            const picker = state.pickers.find(p => p.id === pickerId);
+            if (picker) {
+                picker[`v${state.currentWindow}`] += val;
+                saveState();
+                input.value = ''; // Reset input
+                renderPickers();
+                
+                // Keep focus on the same input if they want to add more quickly, 
+                // but usually they move to the next. Let's just blur it to close keyboard on mobile
+                input.blur(); 
+                showToast(`+${val} SKUs añadidos a ${picker.name}`);
+            }
+        }
+
+        function changeWindow(win) {
+            state.currentWindow = win;
+            saveState();
+            renderPickers(); 
+        }
+
+        function resetDay() {
+            if(confirm("⚠️ ¿Estás seguro de reiniciar todos los contadores a CERO?\n\nLos nombres de los pickers se mantendrán, pero todo su historial de hoy se borrará.")) {
+                state.pickers.forEach(p => {
+                    p.v1 = 0; p.v2 = 0; p.v3 = 0; p.v4 = 0;
+                });
+                state.currentWindow = 1;
+                document.getElementById('v1').checked = true;
+                saveState();
+                renderPickers();
+                showToast('Contadores reiniciados para un nuevo día.', 'primary');
+            }
+        }
+
+        function openAddPickerModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addPickerModal'));
+            modal.show();
+            setTimeout(() => document.getElementById('newPickerName').focus(), 500);
+        }
+
+        // --- UI RENDERING ---
+        function renderPickers() {
+            const container = document.getElementById('pickers-container');
+            container.innerHTML = '';
+
+            if (state.pickers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center mt-5 text-muted p-4 bg-white rounded shadow-sm border">
+                        <i class="bi bi-people" style="font-size: 3.5rem; color:#adb5bd;"></i>
+                        <h5 class="mt-3 fw-bold text-secondary">Lista Vacía</h5>
+                        <p class="mt-2 small">No hay pickers registrados.<br>Toca el botón verde <strong>+</strong> abajo a la derecha para empezar a añadirlos.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Ordenar: Los que tienen MENOS carga total primero, para sugerir a quién asignarle trabajo
+            const sortedPickers = [...state.pickers].sort((a, b) => getPickerTotal(a) - getPickerTotal(b));
+            const maxTotal = getMaxTotal();
+
+            sortedPickers.forEach((picker, index) => {
+                const total = getPickerTotal(picker);
+                const currentV = picker[`v${state.currentWindow}`] || 0;
+                
+                // Calculate percentage for progress bar
+                let percent = (total / maxTotal) * 100;
+                
+                // Color coding based on relative load
+                let colorClass = 'load-low';
+                if (total > 0) {
+                    if (percent > 85) colorClass = 'load-high';
+                    else if (percent > 60) colorClass = 'load-medium';
+                }
+
+                // Identificar si es la mejor opción para asignar (el primero de la lista ordenada y que no esté tan saturado como el máximo)
+                const isTopPriority = index === 0 && (total < maxTotal || state.pickers.length === 1);
+                const badgeHtml = isTopPriority && total > 0 ? `<span class="badge bg-success ms-2 shadow-sm" style="font-size:0.6rem;"><i class="bi bi-star-fill me-1"></i>Recomendado</span>` : '';
+
+                const cardHtml = `
+                    <div class="picker-card">
+                        <div class="progress-bg ${colorClass}" style="width: ${percent}%;"></div>
+                        <div class="picker-content d-flex justify-content-between align-items-center">
+                            
+                            <!-- Left: Info -->
+                            <div style="max-width: 55%;">
+                                <div class="d-flex align-items-center flex-wrap">
+                                    <div class="picker-name text-truncate" onclick="promptDeletePicker('${picker.id}')" title="Toca para eliminar">${picker.name}</div>
+                                    ${badgeHtml}
+                                </div>
+                                <div class="mt-1 d-flex gap-2 flex-wrap">
+                                    <span class="stats-badge shadow-sm" title="Total del Día">
+                                        <i class="bi bi-bar-chart-fill me-1"></i> Total: <strong style="font-size:0.85rem">${total}</strong>
+                                    </span>
+                                    <span class="stats-badge bg-primary text-white shadow-sm border-primary" title="Ventana ${state.currentWindow}">
+                                        V${state.currentWindow}: <strong>${currentV}</strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Right: Input -->
+                            <div class="input-group-custom ms-2">
+                                <input type="number" inputmode="numeric" id="input-${picker.id}" class="sku-input" placeholder="0" onkeypress="if(event.key === 'Enter') addSKUs('${picker.id}')">
+                                <button class="btn btn-primary btn-add-sku" onclick="addSKUs('${picker.id}')"><i class="bi bi-plus-lg"></i></button>
+                            </div>
+
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            renderPickers();
+        });
+    </script>
+</body>
+</html>
