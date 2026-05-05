@@ -15,7 +15,7 @@
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa;
             color: #333;
-            padding-bottom: 90px; /* Space for bottom add button */
+            padding-bottom: 90px;
         }
         .navbar {
             background-color: #0d6efd;
@@ -35,7 +35,7 @@
             top: 0;
             left: 0;
             height: 100%;
-            background-color: rgba(13, 110, 253, 0.08); /* Light blue base */
+            background-color: rgba(13, 110, 253, 0.08);
             z-index: 0;
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -47,7 +47,7 @@
         .picker-name {
             font-weight: 700;
             font-size: 1.15rem;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             color: #212529;
             cursor: pointer;
         }
@@ -79,7 +79,6 @@
             border-color: #0d6efd;
             box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
         }
-        /* Ocultar las flechas del input number */
         .sku-input::-webkit-outer-spin-button,
         .sku-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -117,7 +116,7 @@
             transform: scale(0.92);
             background-color: #146c43;
         }
-        .window-selector {
+        .top-panel {
             background: white;
             padding: 12px 16px;
             border-bottom: 1px solid #eee;
@@ -127,13 +126,17 @@
             z-index: 100;
             box-shadow: 0 2px 5px rgba(0,0,0,0.06);
         }
-        /* Color scale for progress */
-        .load-low { background-color: rgba(25, 135, 84, 0.15); } /* Green: good capacity */
-        .load-medium { background-color: rgba(255, 193, 7, 0.2); } /* Yellow: getting busy */
-        .load-high { background-color: rgba(220, 53, 69, 0.15); } /* Red: high load */
-        
-        .toast-container {
-            z-index: 1055;
+        .load-low { background-color: rgba(25, 135, 84, 0.15); }
+        .load-medium { background-color: rgba(255, 193, 7, 0.2); }
+        .load-high { background-color: rgba(220, 53, 69, 0.15); }
+        .toast-container { z-index: 1055; }
+        .history-btn {
+            background: none;
+            border: none;
+            color: #0d6efd;
+            padding: 0;
+            margin-left: 8px;
+            font-size: 1.1rem;
         }
     </style>
 </head>
@@ -144,27 +147,39 @@
         <div class="container d-flex justify-content-between">
             <span class="navbar-brand mb-0 h1 fw-bold">
                 <i class="bi bi-cart-check"></i> Tracker Pickers 
-                <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem; vertical-align: middle;">v1.0.0</span>
+                <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem; vertical-align: middle;">v1.2.0</span>
             </span>
             <button class="btn btn-sm btn-outline-light fw-bold" onclick="resetDay()"><i class="bi bi-arrow-clockwise"></i> Reiniciar Día</button>
         </div>
     </nav>
 
-    <!-- Window Selector -->
-    <div class="window-selector d-flex justify-content-between align-items-center">
-        <span class="fw-bold text-secondary"><i class="bi bi-clock-history me-1"></i> Ventana:</span>
-        <div class="btn-group shadow-sm" role="group">
-            <input type="radio" class="btn-check" name="windowRadio" id="v1" value="1" autocomplete="off" checked onchange="changeWindow(1)">
-            <label class="btn btn-outline-primary" for="v1">1</label>
+    <!-- Top Panel: Window Selector & Sorting -->
+    <div class="top-panel">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-bold text-secondary"><i class="bi bi-clock-history me-1"></i> Ventana:</span>
+            <div class="btn-group shadow-sm" role="group">
+                <input type="radio" class="btn-check" name="windowRadio" id="v1" value="1" autocomplete="off" checked onchange="changeWindow(1)">
+                <label class="btn btn-outline-primary" for="v1">1</label>
 
-            <input type="radio" class="btn-check" name="windowRadio" id="v2" value="2" autocomplete="off" onchange="changeWindow(2)">
-            <label class="btn btn-outline-primary" for="v2">2</label>
+                <input type="radio" class="btn-check" name="windowRadio" id="v2" value="2" autocomplete="off" onchange="changeWindow(2)">
+                <label class="btn btn-outline-primary" for="v2">2</label>
 
-            <input type="radio" class="btn-check" name="windowRadio" id="v3" value="3" autocomplete="off" onchange="changeWindow(3)">
-            <label class="btn btn-outline-primary" for="v3">3</label>
+                <input type="radio" class="btn-check" name="windowRadio" id="v3" value="3" autocomplete="off" onchange="changeWindow(3)">
+                <label class="btn btn-outline-primary" for="v3">3</label>
 
-            <input type="radio" class="btn-check" name="windowRadio" id="v4" value="4" autocomplete="off" onchange="changeWindow(4)">
-            <label class="btn btn-outline-primary" for="v4">4</label>
+                <input type="radio" class="btn-check" name="windowRadio" id="v4" value="4" autocomplete="off" onchange="changeWindow(4)">
+                <label class="btn btn-outline-primary" for="v4">4</label>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+            <span class="small fw-bold text-muted">Ordenar por:</span>
+            <div class="btn-group btn-group-sm" role="group">
+                <input type="radio" class="btn-check" name="sortRadio" id="sort-sku" value="sku" autocomplete="off" checked onchange="changeSort('sku')">
+                <label class="btn btn-outline-secondary" for="sort-sku">SKUs</label>
+
+                <input type="radio" class="btn-check" name="sortRadio" id="sort-ords" value="orders" autocomplete="off" onchange="changeSort('orders')">
+                <label class="btn btn-outline-secondary" for="sort-ords">Órdenes</label>
+            </div>
         </div>
     </div>
 
@@ -200,6 +215,27 @@
         </div>
     </div>
 
+    <!-- Modal: History -->
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="historyModalTitle">Historial</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <ul class="list-group list-group-flush" id="historyList">
+                        <!-- History items generated by JS -->
+                    </ul>
+                </div>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <div class="small fw-bold text-muted" id="historyTotal">Total: 0 sku (0 ords)</div>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast for notifications -->
     <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
         <div id="actionToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -221,14 +257,45 @@
         
         let state = {
             currentWindow: 1,
+            sortBy: 'sku', // 'sku' or 'orders'
             pickers: [] 
         };
+
+        function migrateData(oldPickers) {
+            // Convierte pickers con v1, v2, v3, v4 a la nueva estructura de historial
+            return oldPickers.map(p => {
+                if (p.history !== undefined) return p; // Ya está migrado
+                
+                let history = [];
+                for(let i = 1; i <= 4; i++) {
+                    const val = p[`v${i}`];
+                    if (val && val > 0) {
+                        history.push({
+                            id: 'h_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                            window: i,
+                            sku: val,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
+                return {
+                    id: p.id,
+                    name: p.name,
+                    history: history
+                };
+            });
+        }
 
         function loadState() {
             const saved = localStorage.getItem(LS_KEY);
             if (saved) {
-                state = JSON.parse(saved);
+                let loadedState = JSON.parse(saved);
+                loadedState.pickers = migrateData(loadedState.pickers || []);
+                if(!loadedState.sortBy) loadedState.sortBy = 'sku';
+                
+                state = loadedState;
                 document.getElementById(`v${state.currentWindow}`).checked = true;
+                document.getElementById(`sort-${state.sortBy === 'sku' ? 'sku' : 'ords'}`).checked = true;
             }
         }
 
@@ -248,13 +315,28 @@
         }
 
         // --- CORE LOGIC ---
-        function getPickerTotal(picker) {
-            return (picker.v1 || 0) + (picker.v2 || 0) + (picker.v3 || 0) + (picker.v4 || 0);
+        function getPickerMetrics(picker, win = null) {
+            let totalSku = 0;
+            let totalOrds = 0;
+            picker.history.forEach(entry => {
+                if (win === null || entry.window === win) {
+                    totalSku += entry.sku;
+                    totalOrds += 1;
+                }
+            });
+            return { sku: totalSku, ords: totalOrds };
         }
 
         function getMaxTotal() {
             if (state.pickers.length === 0) return 1;
-            return Math.max(...state.pickers.map(p => getPickerTotal(p)), 1); // Minimum 1 to avoid division by zero
+            const isSortSku = state.sortBy === 'sku';
+            
+            const max = Math.max(...state.pickers.map(p => {
+                const metrics = getPickerMetrics(p);
+                return isSortSku ? metrics.sku : metrics.ords;
+            }));
+            
+            return Math.max(max, 1); // Avoid div by 0
         }
 
         function addPicker() {
@@ -265,7 +347,7 @@
             state.pickers.push({
                 id: 'p_' + Date.now(),
                 name: name,
-                v1: 0, v2: 0, v3: 0, v4: 0
+                history: []
             });
 
             saveState();
@@ -293,7 +375,7 @@
             const val = parseInt(input.value);
             
             if (isNaN(val) || val <= 0) {
-                input.style.borderColor = '#dc3545'; // red
+                input.style.borderColor = '#dc3545';
                 input.style.backgroundColor = '#fff8f8';
                 setTimeout(() => {
                     input.style.borderColor = '#ced4da';
@@ -304,15 +386,19 @@
 
             const picker = state.pickers.find(p => p.id === pickerId);
             if (picker) {
-                picker[`v${state.currentWindow}`] += val;
+                picker.history.push({
+                    id: 'h_' + Date.now(),
+                    window: state.currentWindow,
+                    sku: val,
+                    timestamp: Date.now()
+                });
+                
                 saveState();
-                input.value = ''; // Reset input
+                input.value = '';
                 renderPickers();
                 
-                // Keep focus on the same input if they want to add more quickly, 
-                // but usually they move to the next. Let's just blur it to close keyboard on mobile
                 input.blur(); 
-                showToast(`+${val} SKUs añadidos a ${picker.name}`);
+                showToast(`+${val} SKUs (1 ord) a ${picker.name}`);
             }
         }
 
@@ -322,10 +408,16 @@
             renderPickers(); 
         }
 
+        function changeSort(method) {
+            state.sortBy = method;
+            saveState();
+            renderPickers();
+        }
+
         function resetDay() {
-            if(confirm("⚠️ ¿Estás seguro de reiniciar todos los contadores a CERO?\n\nLos nombres de los pickers se mantendrán, pero todo su historial de hoy se borrará.")) {
+            if(confirm("⚠️ ¿Estás seguro de reiniciar todos los contadores a CERO?\n\nLos nombres de los pickers se mantendrán, pero todo el historial de hoy se borrará.")) {
                 state.pickers.forEach(p => {
-                    p.v1 = 0; p.v2 = 0; p.v3 = 0; p.v4 = 0;
+                    p.history = [];
                 });
                 state.currentWindow = 1;
                 document.getElementById('v1').checked = true;
@@ -339,6 +431,79 @@
             const modal = new bootstrap.Modal(document.getElementById('addPickerModal'));
             modal.show();
             setTimeout(() => document.getElementById('newPickerName').focus(), 500);
+        }
+
+        // --- HISTORY LOGIC ---
+        function editPickerNote(pickerId) {
+            const picker = state.pickers.find(p => p.id === pickerId);
+            if (picker) {
+                const currentNote = picker.notes || '';
+                const newNote = prompt(`Notas para ${picker.name} (ej: llegó tarde, part time):\nDejar en blanco para borrar la nota.`, currentNote);
+                if (newNote !== null) {
+                    picker.notes = newNote.trim();
+                    saveState();
+                    renderPickers();
+                }
+            }
+        }
+
+        function openHistoryModal(pickerId) {
+            const picker = state.pickers.find(p => p.id === pickerId);
+            if (!picker) return;
+
+            document.getElementById('historyModalTitle').textContent = `Historial: ${picker.name}`;
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+
+            let windowCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+            
+            if (picker.history.length === 0) {
+                list.innerHTML = `<li class="list-group-item text-center text-muted p-4">No hay órdenes registradas aún.</li>`;
+            } else {
+                // Clone and sort by newest first
+                const sortedHistory = [...picker.history].sort((a, b) => b.timestamp - a.timestamp);
+                
+                sortedHistory.forEach(entry => {
+                    windowCounts[entry.window]++;
+                    const orderNumInWin = windowCounts[entry.window];
+                    const timeStr = new Date(entry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    const li = document.createElement('li');
+                    li.className = "list-group-item d-flex justify-content-between align-items-center";
+                    li.innerHTML = `
+                        <div>
+                            <span class="badge bg-primary me-2">V${entry.window}</span>
+                            <strong>${entry.sku} sku</strong> 
+                            <span class="text-muted small ms-2">(${timeStr})</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteHistoryEntry('${picker.id}', '${entry.id}')" title="Borrar entrada"><i class="bi bi-trash"></i></button>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+
+            const metrics = getPickerMetrics(picker);
+            document.getElementById('historyTotal').textContent = `Total General: ${metrics.sku} sku (${metrics.ords} ords)`;
+
+            const modal = new bootstrap.Modal(document.getElementById('historyModal'));
+            modal.show();
+        }
+
+        function deleteHistoryEntry(pickerId, historyId) {
+            if(confirm("¿Borrar esta orden del historial?")) {
+                const picker = state.pickers.find(p => p.id === pickerId);
+                if (picker) {
+                    picker.history = picker.history.filter(h => h.id !== historyId);
+                    saveState();
+                    renderPickers();
+                    
+                    // Close modal automatically to refresh the flow
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('historyModal'));
+                    if (modal) modal.hide();
+                    
+                    showToast('Orden eliminada del historial.', 'secondary');
+                }
+            }
         }
 
         // --- UI RENDERING ---
@@ -357,27 +522,48 @@
                 return;
             }
 
-            // Ordenar: Los que tienen MENOS carga total primero, para sugerir a quién asignarle trabajo
-            const sortedPickers = [...state.pickers].sort((a, b) => getPickerTotal(a) - getPickerTotal(b));
+            // Decorar los pickers con sus métricas calculadas para evitar recalcular
+            const decoratedPickers = state.pickers.map(p => {
+                const total = getPickerMetrics(p);
+                const current = getPickerMetrics(p, state.currentWindow);
+                return { ...p, totalMetrics: total, currentMetrics: current };
+            });
+
+            // Sorting logic
+            const sortedPickers = decoratedPickers.sort((a, b) => {
+                if (state.sortBy === 'sku') {
+                    // Sort by SKU, tie-breaker: less orders
+                    if (a.totalMetrics.sku !== b.totalMetrics.sku) {
+                        return a.totalMetrics.sku - b.totalMetrics.sku;
+                    }
+                    return a.totalMetrics.ords - b.totalMetrics.ords;
+                } else {
+                    // Sort by Orders, tie-breaker: less SKUs
+                    if (a.totalMetrics.ords !== b.totalMetrics.ords) {
+                        return a.totalMetrics.ords - b.totalMetrics.ords;
+                    }
+                    return a.totalMetrics.sku - b.totalMetrics.sku;
+                }
+            });
+
             const maxTotal = getMaxTotal();
 
             sortedPickers.forEach((picker, index) => {
-                const total = getPickerTotal(picker);
-                const currentV = picker[`v${state.currentWindow}`] || 0;
+                const isSortSku = state.sortBy === 'sku';
+                const mainVal = isSortSku ? picker.totalMetrics.sku : picker.totalMetrics.ords;
                 
-                // Calculate percentage for progress bar
-                let percent = (total / maxTotal) * 100;
+                let percent = (mainVal / maxTotal) * 100;
                 
-                // Color coding based on relative load
                 let colorClass = 'load-low';
-                if (total > 0) {
+                if (mainVal > 0) {
                     if (percent > 85) colorClass = 'load-high';
                     else if (percent > 60) colorClass = 'load-medium';
                 }
 
-                // Identificar si es la mejor opción para asignar (el primero de la lista ordenada y que no esté tan saturado como el máximo)
-                const isTopPriority = index === 0 && (total < maxTotal || state.pickers.length === 1);
-                const badgeHtml = isTopPriority && total > 0 ? `<span class="badge bg-success ms-2 shadow-sm" style="font-size:0.6rem;"><i class="bi bi-star-fill me-1"></i>Recomendado</span>` : '';
+                // Recomendado para el de arriba siempre que haya al menos alguien con > 0 carga (o si es el único)
+                const hasAnyLoad = maxTotal > 0 || mainVal > 0;
+                const isTopPriority = index === 0 && (percent < 100 || state.pickers.length === 1);
+                const badgeHtml = isTopPriority && hasAnyLoad ? `<span class="badge bg-success ms-2 shadow-sm" style="font-size:0.6rem;"><i class="bi bi-star-fill me-1"></i>Recomendado</span>` : '';
 
                 const cardHtml = `
                     <div class="picker-card">
@@ -388,14 +574,17 @@
                             <div style="max-width: 55%;">
                                 <div class="d-flex align-items-center flex-wrap">
                                     <div class="picker-name text-truncate" onclick="promptDeletePicker('${picker.id}')" title="Toca para eliminar">${picker.name}</div>
+                                    <button class="history-btn ms-2" onclick="editPickerNote('${picker.id}')" title="Editar Notas" style="color: #6c757d; font-size: 0.9rem;"><i class="bi bi-journal-text"></i></button>
+                                    <button class="history-btn" onclick="openHistoryModal('${picker.id}')" title="Ver Historial"><i class="bi bi-clock-history"></i></button>
                                     ${badgeHtml}
                                 </div>
-                                <div class="mt-1 d-flex gap-2 flex-wrap">
-                                    <span class="stats-badge shadow-sm" title="Total del Día">
-                                        <i class="bi bi-bar-chart-fill me-1"></i> Total: <strong style="font-size:0.85rem">${total}</strong>
+                                ${picker.notes ? `<div class="small text-muted mb-1" style="font-size: 0.75rem; line-height: 1.2; max-width: 100%;"><i class="bi bi-info-circle me-1"></i>${picker.notes}</div>` : ''}
+                                <div class="mt-1 d-flex flex-column gap-1">
+                                    <span class="stats-badge shadow-sm" title="Total del Día" onclick="openHistoryModal('${picker.id}')" style="cursor:pointer; width: max-content;">
+                                        <i class="bi bi-bar-chart-fill me-1"></i> Total: <strong style="font-size:0.85rem">${picker.totalMetrics.sku}</strong> sku (${picker.totalMetrics.ords} ords)
                                     </span>
-                                    <span class="stats-badge bg-primary text-white shadow-sm border-primary" title="Ventana ${state.currentWindow}">
-                                        V${state.currentWindow}: <strong>${currentV}</strong>
+                                    <span class="stats-badge bg-primary text-white shadow-sm border-primary" title="Ventana ${state.currentWindow}" style="width: max-content;">
+                                        V${state.currentWindow}: <strong>${picker.currentMetrics.sku}</strong> sku (${picker.currentMetrics.ords} ords)
                                     </span>
                                 </div>
                             </div>
