@@ -147,7 +147,7 @@
         <div class="container d-flex justify-content-between">
             <span class="navbar-brand mb-0 h1 fw-bold">
                 <i class="bi bi-cart-check"></i> Tracker Pickers 
-                <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem; vertical-align: middle;">v1.3.0</span>
+                <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem; vertical-align: middle;">v1.4.1</span>
             </span>
             <button class="btn btn-sm btn-outline-light fw-bold" onclick="resetDay()"><i class="bi bi-arrow-clockwise"></i> Reiniciar Día</button>
         </div>
@@ -158,17 +158,20 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="fw-bold text-secondary"><i class="bi bi-clock-history me-1"></i> Ventana:</span>
             <div class="btn-group shadow-sm" role="group">
-                <input type="radio" class="btn-check" name="windowRadio" id="v1" value="1" autocomplete="off" checked onchange="changeWindow(1)">
-                <label class="btn btn-outline-primary" for="v1">1</label>
+                <input type="radio" class="btn-check" name="windowRadio" id="v1" value="1" autocomplete="off" checked onchange="changeWindow('1')">
+                <label class="btn btn-outline-primary px-2" for="v1">1</label>
 
-                <input type="radio" class="btn-check" name="windowRadio" id="v2" value="2" autocomplete="off" onchange="changeWindow(2)">
-                <label class="btn btn-outline-primary" for="v2">2</label>
+                <input type="radio" class="btn-check" name="windowRadio" id="v2" value="2" autocomplete="off" onchange="changeWindow('2')">
+                <label class="btn btn-outline-primary px-2" for="v2">2</label>
 
-                <input type="radio" class="btn-check" name="windowRadio" id="v3" value="3" autocomplete="off" onchange="changeWindow(3)">
-                <label class="btn btn-outline-primary" for="v3">3</label>
+                <input type="radio" class="btn-check" name="windowRadio" id="v3" value="3" autocomplete="off" onchange="changeWindow('3')">
+                <label class="btn btn-outline-primary px-2" for="v3">3</label>
 
-                <input type="radio" class="btn-check" name="windowRadio" id="v4" value="4" autocomplete="off" onchange="changeWindow(4)">
-                <label class="btn btn-outline-primary" for="v4">4</label>
+                <input type="radio" class="btn-check" name="windowRadio" id="v4" value="4" autocomplete="off" onchange="changeWindow('4')">
+                <label class="btn btn-outline-primary px-2" for="v4">4</label>
+
+                <input type="radio" class="btn-check" name="windowRadio" id="vpre" value="pre" autocomplete="off" onchange="changeWindow('pre')">
+                <label class="btn btn-outline-secondary fw-bold px-2" for="vpre" style="background-color: #f8f9fa;">Pre</label>
             </div>
         </div>
         <div class="d-flex justify-content-between align-items-center pt-2 border-top">
@@ -248,7 +251,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-3">
-                    <p class="small text-muted mb-2">Puedes editar el texto antes de copiarlo (ej: cambiar "Ventana 1" a "Ventana 10am").</p>
+                    <p class="small text-muted mb-2">Puedes editar el texto antes de copiarlo.</p>
                     <textarea id="summaryTextarea" class="form-control" rows="11" style="font-family: monospace; font-size: 0.85rem;"></textarea>
                 </div>
                 <div class="modal-footer bg-light">
@@ -279,15 +282,14 @@
         const LS_KEY = 'mkr_picker_tracker_state';
         
         let state = {
-            currentWindow: 1,
+            currentWindow: '1',
             sortBy: 'sku', // 'sku' or 'orders'
             pickers: [] 
         };
 
         function migrateData(oldPickers) {
-            // Convierte pickers con v1, v2, v3, v4 a la nueva estructura de historial
             return oldPickers.map(p => {
-                if (p.history !== undefined) return p; // Ya está migrado
+                if (p.history !== undefined) return p; 
                 
                 let history = [];
                 for(let i = 1; i <= 4; i++) {
@@ -295,7 +297,7 @@
                     if (val && val > 0) {
                         history.push({
                             id: 'h_' + Date.now() + Math.random().toString(36).substr(2, 5),
-                            window: i,
+                            window: i.toString(),
                             sku: val,
                             timestamp: Date.now()
                         });
@@ -304,7 +306,8 @@
                 return {
                     id: p.id,
                     name: p.name,
-                    history: history
+                    history: history,
+                    notes: p.notes
                 };
             });
         }
@@ -315,9 +318,13 @@
                 let loadedState = JSON.parse(saved);
                 loadedState.pickers = migrateData(loadedState.pickers || []);
                 if(!loadedState.sortBy) loadedState.sortBy = 'sku';
+                if(!loadedState.currentWindow) loadedState.currentWindow = '1';
                 
                 state = loadedState;
-                document.getElementById(`v${state.currentWindow}`).checked = true;
+                
+                const winRadio = document.getElementById(`v${state.currentWindow}`);
+                if (winRadio) winRadio.checked = true;
+                
                 document.getElementById(`sort-${state.sortBy === 'sku' ? 'sku' : 'ords'}`).checked = true;
             }
         }
@@ -330,7 +337,7 @@
             const toastEl = document.getElementById('actionToast');
             const toastBody = document.getElementById('toastMessage');
             
-            toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+            toastEl.className = `toast align-items-center text-white bg-${type} border-0 shadow`;
             toastBody.textContent = message;
             
             const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
@@ -342,24 +349,20 @@
             let totalSku = 0;
             let totalOrds = 0;
             picker.history.forEach(entry => {
-                if (win === null || entry.window === win) {
+                // Si win es null, calculamos el Total de Hoy (excluye 'pre')
+                if (win === null) {
+                    if (entry.window !== 'pre') {
+                        totalSku += entry.sku;
+                        totalOrds += 1;
+                    }
+                } 
+                // Si se pide una ventana específica
+                else if (entry.window.toString() === win.toString()) {
                     totalSku += entry.sku;
                     totalOrds += 1;
                 }
             });
             return { sku: totalSku, ords: totalOrds };
-        }
-
-        function getMaxTotal() {
-            if (state.pickers.length === 0) return 1;
-            const isSortSku = state.sortBy === 'sku';
-            
-            const max = Math.max(...state.pickers.map(p => {
-                const metrics = getPickerMetrics(p);
-                return isSortSku ? metrics.sku : metrics.ords;
-            }));
-            
-            return Math.max(max, 1); // Avoid div by 0
         }
 
         function addPicker() {
@@ -411,7 +414,7 @@
             if (picker) {
                 picker.history.push({
                     id: 'h_' + Date.now(),
-                    window: state.currentWindow,
+                    window: state.currentWindow.toString(),
                     sku: val,
                     timestamp: Date.now()
                 });
@@ -438,15 +441,18 @@
         }
 
         function resetDay() {
-            if(confirm("⚠️ ¿Estás seguro de reiniciar todos los contadores a CERO?\n\nLos nombres de los pickers se mantendrán, pero todo el historial de hoy se borrará.")) {
+            if(confirm("⚠️ ¿Estás seguro de reiniciar el día?\n\n- Se borrarán las ventanas 1 a 4.\n- Lo que esté en 'Pre' pasará al historial de hoy como 'ANT' (Anterior).")) {
                 state.pickers.forEach(p => {
-                    p.history = [];
+                    // Filtrar solo las que son 'pre'
+                    const preHistory = p.history.filter(h => h.window === 'pre');
+                    // Cambiarles la ventana a 'ANT'
+                    p.history = preHistory.map(h => ({ ...h, window: 'ANT' }));
                 });
-                state.currentWindow = 1;
+                state.currentWindow = '1';
                 document.getElementById('v1').checked = true;
                 saveState();
                 renderPickers();
-                showToast('Contadores reiniciados para un nuevo día.', 'primary');
+                showToast('Día reiniciado. Trabajo "Pre" movido a "ANT".', 'primary');
             }
         }
 
@@ -456,7 +462,7 @@
             setTimeout(() => document.getElementById('newPickerName').focus(), 500);
         }
 
-        // --- HISTORY LOGIC ---
+        // --- HISTORY & NOTES LOGIC ---
         function editPickerNote(pickerId) {
             const picker = state.pickers.find(p => p.id === pickerId);
             if (picker) {
@@ -478,24 +484,28 @@
             const list = document.getElementById('historyList');
             list.innerHTML = '';
 
-            let windowCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+            let windowCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 'pre': 0, 'ANT': 0 };
             
             if (picker.history.length === 0) {
                 list.innerHTML = `<li class="list-group-item text-center text-muted p-4">No hay órdenes registradas aún.</li>`;
             } else {
-                // Clone and sort by newest first
                 const sortedHistory = [...picker.history].sort((a, b) => b.timestamp - a.timestamp);
                 
                 sortedHistory.forEach(entry => {
-                    windowCounts[entry.window]++;
-                    const orderNumInWin = windowCounts[entry.window];
+                    const isEntryPre = entry.window === 'pre';
+                    const isEntryAnt = entry.window === 'ANT';
                     const timeStr = new Date(entry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
+                    let badgeLabel = 'V' + entry.window;
+                    let badgeClass = 'bg-primary';
+                    if (isEntryPre) { badgeLabel = 'PRE'; badgeClass = 'bg-secondary'; }
+                    else if (isEntryAnt) { badgeLabel = 'ANT'; badgeClass = 'bg-info text-dark'; }
+
                     const li = document.createElement('li');
                     li.className = "list-group-item d-flex justify-content-between align-items-center";
                     li.innerHTML = `
                         <div>
-                            <span class="badge bg-primary me-2">V${entry.window}</span>
+                            <span class="badge ${badgeClass} me-2">${badgeLabel}</span>
                             <strong>${entry.sku} sku</strong> 
                             <span class="text-muted small ms-2">(${timeStr})</span>
                         </div>
@@ -505,8 +515,8 @@
                 });
             }
 
-            const metrics = getPickerMetrics(picker);
-            document.getElementById('historyTotal').textContent = `Total General: ${metrics.sku} sku (${metrics.ords} ords)`;
+            const metrics = getPickerMetrics(picker); // Hoy
+            document.getElementById('historyTotal').textContent = `Hoy (V1-V4): ${metrics.sku} sku (${metrics.ords} ords)`;
 
             const modal = new bootstrap.Modal(document.getElementById('historyModal'));
             modal.show();
@@ -520,7 +530,6 @@
                     saveState();
                     renderPickers();
                     
-                    // Close modal automatically to refresh the flow
                     const modal = bootstrap.Modal.getInstance(document.getElementById('historyModal'));
                     if (modal) modal.hide();
                     
@@ -532,7 +541,8 @@
         // --- SUMMARY LOGIC ---
         function generateSummaryText() {
             let win = state.currentWindow;
-            let text = `Ventana ${win}\n\n`;
+            let isPre = (win === 'pre');
+            let text = isPre ? `Pre-Picking (Mañana)\n\n` : `Ventana ${win}\n\n`;
 
             const decoratedPickers = state.pickers.map(p => {
                 let prevTotal = 0;
@@ -542,13 +552,26 @@
                 const sortedHistory = [...p.history].sort((a, b) => a.timestamp - b.timestamp);
 
                 sortedHistory.forEach(h => {
-                    // Check logic based on window string vs int
-                    if (parseInt(h.window) < parseInt(win)) {
-                        prevTotal += h.sku;
-                        newTotal += h.sku;
-                    } else if (parseInt(h.window) === parseInt(win)) {
-                        currentOrders.push(h.sku);
-                        newTotal += h.sku;
+                    if (isPre) {
+                        // En modo Pre, ignoramos lo del día (V1..V4)
+                        if (h.window === 'pre') {
+                            currentOrders.push(h.sku);
+                            newTotal += h.sku;
+                        }
+                    } else {
+                        // Modo normal V1..V4
+                        if (h.window !== 'pre') {
+                            const hWin = h.window === 'ANT' ? 0 : parseInt(h.window);
+                            const currentWin = parseInt(win);
+                            
+                            if (hWin < currentWin) {
+                                prevTotal += h.sku;
+                                newTotal += h.sku;
+                            } else if (hWin === currentWin) {
+                                currentOrders.push(h.sku);
+                                newTotal += h.sku;
+                            }
+                        }
                     }
                 });
                 return { name: p.name, prevTotal, currentOrders, newTotal };
@@ -556,7 +579,7 @@
 
             decoratedPickers.forEach(p => {
                 let line = `${p.name}: `;
-                if (win > 1) {
+                if (!isPre && (parseInt(win) > 1 || p.prevTotal > 0)) {
                     line += `${p.prevTotal}. `;
                 }
                 
@@ -583,13 +606,13 @@
         function copySummary() {
             const textarea = document.getElementById('summaryTextarea');
             textarea.select();
-            textarea.setSelectionRange(0, 99999); // For mobile devices
+            textarea.setSelectionRange(0, 99999);
             
             navigator.clipboard.writeText(textarea.value).then(() => {
                 showToast('¡Resumen copiado al portapapeles!');
             }).catch(err => {
                 console.error('Failed to copy: ', err);
-                showToast('Error al copiar. Intenta mantener presionado el texto para copiarlo manualmente.', 'danger');
+                showToast('Error al copiar. Intenta mantener presionado el texto para copiarlo.', 'danger');
             });
         }
 
@@ -597,6 +620,8 @@
         function renderPickers() {
             const container = document.getElementById('pickers-container');
             container.innerHTML = '';
+            
+            const isPre = state.currentWindow === 'pre';
 
             if (state.pickers.length === 0) {
                 container.innerHTML = `
@@ -609,35 +634,41 @@
                 return;
             }
 
-            // Decorar los pickers con sus métricas calculadas para evitar recalcular
             const decoratedPickers = state.pickers.map(p => {
-                const total = getPickerMetrics(p);
-                const current = getPickerMetrics(p, state.currentWindow);
+                const total = getPickerMetrics(p); // V1-V4 solo
+                const current = getPickerMetrics(p, state.currentWindow); // V actual o Pre
                 return { ...p, totalMetrics: total, currentMetrics: current };
             });
 
-            // Sorting logic
             const sortedPickers = decoratedPickers.sort((a, b) => {
+                // If PRE, sum totalMetrics + currentMetrics to balance workload based on everything done today
+                // If V1-V4, base the ranking just on 'totalMetrics' (day totals so far)
+                const getCombined = (p) => isPre ? { sku: p.totalMetrics.sku + p.currentMetrics.sku, ords: p.totalMetrics.ords + p.currentMetrics.ords } : p.totalMetrics;
+                
+                const aMetrics = getCombined(a);
+                const bMetrics = getCombined(b);
+
                 if (state.sortBy === 'sku') {
-                    // Sort by SKU, tie-breaker: less orders
-                    if (a.totalMetrics.sku !== b.totalMetrics.sku) {
-                        return a.totalMetrics.sku - b.totalMetrics.sku;
-                    }
-                    return a.totalMetrics.ords - b.totalMetrics.ords;
+                    if (aMetrics.sku !== bMetrics.sku) return aMetrics.sku - bMetrics.sku;
+                    return aMetrics.ords - bMetrics.ords;
                 } else {
-                    // Sort by Orders, tie-breaker: less SKUs
-                    if (a.totalMetrics.ords !== b.totalMetrics.ords) {
-                        return a.totalMetrics.ords - b.totalMetrics.ords;
-                    }
-                    return a.totalMetrics.sku - b.totalMetrics.sku;
+                    if (aMetrics.ords !== bMetrics.ords) return aMetrics.ords - bMetrics.ords;
+                    return aMetrics.sku - bMetrics.sku;
                 }
             });
 
-            const maxTotal = getMaxTotal();
+            // Calc max for the progress bar based on active logic
+            let maxTotal = 1;
+            sortedPickers.forEach(p => {
+                const metrics = isPre ? { sku: p.totalMetrics.sku + p.currentMetrics.sku, ords: p.totalMetrics.ords + p.currentMetrics.ords } : p.totalMetrics;
+                const val = state.sortBy === 'sku' ? metrics.sku : metrics.ords;
+                if (val > maxTotal) maxTotal = val;
+            });
 
             sortedPickers.forEach((picker, index) => {
                 const isSortSku = state.sortBy === 'sku';
-                const mainVal = isSortSku ? picker.totalMetrics.sku : picker.totalMetrics.ords;
+                const metricsToUse = isPre ? { sku: picker.totalMetrics.sku + picker.currentMetrics.sku, ords: picker.totalMetrics.ords + picker.currentMetrics.ords } : picker.totalMetrics;
+                const mainVal = isSortSku ? metricsToUse.sku : metricsToUse.ords;
                 
                 let percent = (mainVal / maxTotal) * 100;
                 
@@ -647,7 +678,6 @@
                     else if (percent > 60) colorClass = 'load-medium';
                 }
 
-                // Recomendado para el de arriba siempre que haya al menos alguien con > 0 carga (o si es el único)
                 const hasAnyLoad = maxTotal > 0 || mainVal > 0;
                 const isTopPriority = index === 0 && (percent < 100 || state.pickers.length === 1);
                 const badgeHtml = isTopPriority && hasAnyLoad ? `<span class="badge bg-success ms-2 shadow-sm" style="font-size:0.6rem;"><i class="bi bi-star-fill me-1"></i>Recomendado</span>` : '';
@@ -667,11 +697,11 @@
                                 </div>
                                 ${picker.notes ? `<div class="small text-muted mb-1" style="font-size: 0.75rem; line-height: 1.2; max-width: 100%;"><i class="bi bi-info-circle me-1"></i>${picker.notes}</div>` : ''}
                                 <div class="mt-1 d-flex flex-column gap-1">
-                                    <span class="stats-badge shadow-sm" title="Total del Día" onclick="openHistoryModal('${picker.id}')" style="cursor:pointer; width: max-content;">
-                                        <i class="bi bi-bar-chart-fill me-1"></i> Total: <strong style="font-size:0.85rem">${picker.totalMetrics.sku}</strong> sku (${picker.totalMetrics.ords} ords)
+                                    <span class="stats-badge shadow-sm" title="Total del Día (V1-V4)" onclick="openHistoryModal('${picker.id}')" style="cursor:pointer; width: max-content;">
+                                        <i class="bi bi-bar-chart-fill me-1"></i> Hoy: <strong style="font-size:0.85rem">${picker.totalMetrics.sku}</strong> sku (${picker.totalMetrics.ords} ords)
                                     </span>
-                                    <span class="stats-badge bg-primary text-white shadow-sm border-primary" title="Ventana ${state.currentWindow}" style="width: max-content;">
-                                        V${state.currentWindow}: <strong>${picker.currentMetrics.sku}</strong> sku (${picker.currentMetrics.ords} ords)
+                                    <span class="stats-badge text-white shadow-sm ${isPre ? 'bg-secondary border-secondary' : 'bg-primary border-primary'}" title="${isPre ? 'Adelanto Mañana' : 'Ventana ' + state.currentWindow}" style="width: max-content;">
+                                        ${isPre ? 'PRE' : 'V' + state.currentWindow}: <strong>${picker.currentMetrics.sku}</strong> sku (${picker.currentMetrics.ords} ords)
                                     </span>
                                 </div>
                             </div>
