@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -17,19 +18,22 @@
             color: #333;
             padding-bottom: 90px;
         }
+
         .navbar {
             background-color: #0d6efd;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .picker-card {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
             margin-bottom: 14px;
             overflow: hidden;
             position: relative;
             border: 1px solid #eaeaea;
         }
+
         .progress-bg {
             position: absolute;
             top: 0;
@@ -39,11 +43,13 @@
             z-index: 0;
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .picker-content {
             position: relative;
             z-index: 1;
             padding: 14px 16px;
         }
+
         .picker-name {
             font-weight: 700;
             font-size: 1.15rem;
@@ -51,6 +57,7 @@
             color: #212529;
             cursor: pointer;
         }
+
         .stats-badge {
             font-size: 0.75rem;
             background: #e9ecef;
@@ -60,10 +67,12 @@
             font-weight: 600;
             border: 1px solid #dee2e6;
         }
+
         .input-group-custom {
             display: flex;
             align-items: center;
         }
+
         .sku-input {
             width: 65px;
             text-align: center;
@@ -72,21 +81,25 @@
             border: 1px solid #ced4da;
             border-radius: 8px 0 0 8px;
             height: 46px;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
         }
+
         .sku-input:focus {
             outline: none;
             border-color: #0d6efd;
-            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, .25);
         }
+
         .sku-input::-webkit-outer-spin-button,
         .sku-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+
         .sku-input[type=number] {
             -moz-appearance: textfield;
         }
+
         .btn-add-sku {
             border-radius: 0 8px 8px 0;
             height: 46px;
@@ -94,6 +107,7 @@
             font-weight: bold;
             font-size: 1.1rem;
         }
+
         .floating-add-btn {
             position: fixed;
             bottom: 25px;
@@ -112,10 +126,12 @@
             z-index: 1000;
             transition: transform 0.1s;
         }
+
         .floating-add-btn:active {
             transform: scale(0.92);
             background-color: #146c43;
         }
+
         .top-panel {
             background: white;
             padding: 12px 16px;
@@ -124,12 +140,25 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
         }
-        .load-low { background-color: rgba(25, 135, 84, 0.15); }
-        .load-medium { background-color: rgba(255, 193, 7, 0.2); }
-        .load-high { background-color: rgba(220, 53, 69, 0.15); }
-        .toast-container { z-index: 1055; }
+
+        .load-low {
+            background-color: rgba(25, 135, 84, 0.15);
+        }
+
+        .load-medium {
+            background-color: rgba(255, 193, 7, 0.2);
+        }
+
+        .load-high {
+            background-color: rgba(220, 53, 69, 0.15);
+        }
+
+        .toast-container {
+            z-index: 1055;
+        }
+
         .history-btn {
             background: none;
             border: none;
@@ -140,16 +169,19 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- Navbar -->
     <nav class="navbar navbar-dark">
         <div class="container d-flex justify-content-between">
             <span class="navbar-brand mb-0 h1 fw-bold">
-                <i class="bi bi-cart-check"></i> Tracker Pickers 
-                <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem; vertical-align: middle;">v1.4.1</span>
+                <i class="bi bi-cart-check"></i> Tracker Pickers
+                <span class="badge bg-warning text-dark ms-1"
+                    style="font-size: 0.6rem; vertical-align: middle;">v1.4.2</span>
             </span>
-            <button class="btn btn-sm btn-outline-light fw-bold" onclick="resetDay()"><i class="bi bi-arrow-clockwise"></i> Reiniciar Día</button>
+            <button class="btn btn-sm btn-outline-light fw-bold" onclick="resetDay()"><i
+                    class="bi bi-arrow-clockwise"></i> Reiniciar Día</button>
         </div>
     </nav>
 
@@ -158,34 +190,43 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="fw-bold text-secondary"><i class="bi bi-clock-history me-1"></i> Ventana:</span>
             <div class="btn-group shadow-sm" role="group">
-                <input type="radio" class="btn-check" name="windowRadio" id="v1" value="1" autocomplete="off" checked onchange="changeWindow('1')">
+                <input type="radio" class="btn-check" name="windowRadio" id="v1" value="1" autocomplete="off" checked
+                    onchange="changeWindow('1')">
                 <label class="btn btn-outline-primary px-2" for="v1">1</label>
 
-                <input type="radio" class="btn-check" name="windowRadio" id="v2" value="2" autocomplete="off" onchange="changeWindow('2')">
+                <input type="radio" class="btn-check" name="windowRadio" id="v2" value="2" autocomplete="off"
+                    onchange="changeWindow('2')">
                 <label class="btn btn-outline-primary px-2" for="v2">2</label>
 
-                <input type="radio" class="btn-check" name="windowRadio" id="v3" value="3" autocomplete="off" onchange="changeWindow('3')">
+                <input type="radio" class="btn-check" name="windowRadio" id="v3" value="3" autocomplete="off"
+                    onchange="changeWindow('3')">
                 <label class="btn btn-outline-primary px-2" for="v3">3</label>
 
-                <input type="radio" class="btn-check" name="windowRadio" id="v4" value="4" autocomplete="off" onchange="changeWindow('4')">
+                <input type="radio" class="btn-check" name="windowRadio" id="v4" value="4" autocomplete="off"
+                    onchange="changeWindow('4')">
                 <label class="btn btn-outline-primary px-2" for="v4">4</label>
 
-                <input type="radio" class="btn-check" name="windowRadio" id="vpre" value="pre" autocomplete="off" onchange="changeWindow('pre')">
-                <label class="btn btn-outline-secondary fw-bold px-2" for="vpre" style="background-color: #f8f9fa;">Pre</label>
+                <input type="radio" class="btn-check" name="windowRadio" id="vpre" value="pre" autocomplete="off"
+                    onchange="changeWindow('pre')">
+                <label class="btn btn-outline-secondary fw-bold px-2" for="vpre"
+                    style="background-color: #f8f9fa;">Pre</label>
             </div>
         </div>
         <div class="d-flex justify-content-between align-items-center pt-2 border-top">
             <div class="d-flex align-items-center">
                 <span class="small fw-bold text-muted me-2">Ordenar:</span>
                 <div class="btn-group btn-group-sm" role="group">
-                    <input type="radio" class="btn-check" name="sortRadio" id="sort-sku" value="sku" autocomplete="off" checked onchange="changeSort('sku')">
+                    <input type="radio" class="btn-check" name="sortRadio" id="sort-sku" value="sku" autocomplete="off"
+                        checked onchange="changeSort('sku')">
                     <label class="btn btn-outline-secondary" for="sort-sku">SKUs</label>
 
-                    <input type="radio" class="btn-check" name="sortRadio" id="sort-ords" value="orders" autocomplete="off" onchange="changeSort('orders')">
+                    <input type="radio" class="btn-check" name="sortRadio" id="sort-ords" value="orders"
+                        autocomplete="off" onchange="changeSort('orders')">
                     <label class="btn btn-outline-secondary" for="sort-ords">Órds</label>
                 </div>
             </div>
-            <button class="btn btn-sm btn-success fw-bold" onclick="openSummaryModal()"><i class="bi bi-whatsapp"></i> Compartir</button>
+            <button class="btn btn-sm btn-success fw-bold" onclick="openSummaryModal()"><i class="bi bi-whatsapp"></i>
+                Compartir</button>
         </div>
     </div>
 
@@ -209,7 +250,9 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="form-floating mb-2">
-                        <input type="text" id="newPickerName" class="form-control form-control-lg fw-bold" placeholder="Nombre del Picker" autocomplete="off" onkeypress="if(event.key === 'Enter') addPicker()">
+                        <input type="text" id="newPickerName" class="form-control form-control-lg fw-bold"
+                            placeholder="Nombre del Picker" autocomplete="off"
+                            onkeypress="if(event.key === 'Enter') addPicker()">
                         <label for="newPickerName">Nombre o Apodo</label>
                     </div>
                 </div>
@@ -248,15 +291,18 @@
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title fw-bold"><i class="bi bi-whatsapp"></i> Resumen Ventana</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-3">
                     <p class="small text-muted mb-2">Puedes editar el texto antes de copiarlo.</p>
-                    <textarea id="summaryTextarea" class="form-control" rows="11" style="font-family: monospace; font-size: 0.85rem;"></textarea>
+                    <textarea id="summaryTextarea" class="form-control" rows="11"
+                        style="font-family: monospace; font-size: 0.85rem;"></textarea>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-success fw-bold px-4" onclick="copySummary()"><i class="bi bi-clipboard me-1"></i> Copiar</button>
+                    <button type="button" class="btn btn-success fw-bold px-4" onclick="copySummary()"><i
+                            class="bi bi-clipboard me-1"></i> Copiar</button>
                 </div>
             </div>
         </div>
@@ -264,12 +310,14 @@
 
     <!-- Toast for notifications -->
     <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
-        <div id="actionToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="actionToast" class="toast align-items-center text-white bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body fw-bold" id="toastMessage">
                     Acción completada.
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
             </div>
         </div>
     </div>
@@ -280,19 +328,19 @@
     <script>
         // --- STATE MANAGEMENT ---
         const LS_KEY = 'mkr_picker_tracker_state';
-        
+
         let state = {
             currentWindow: '1',
             sortBy: 'sku', // 'sku' or 'orders'
-            pickers: [] 
+            pickers: []
         };
 
         function migrateData(oldPickers) {
             return oldPickers.map(p => {
-                if (p.history !== undefined) return p; 
-                
+                if (p.history !== undefined) return p;
+
                 let history = [];
-                for(let i = 1; i <= 4; i++) {
+                for (let i = 1; i <= 4; i++) {
                     const val = p[`v${i}`];
                     if (val && val > 0) {
                         history.push({
@@ -317,14 +365,14 @@
             if (saved) {
                 let loadedState = JSON.parse(saved);
                 loadedState.pickers = migrateData(loadedState.pickers || []);
-                if(!loadedState.sortBy) loadedState.sortBy = 'sku';
-                if(!loadedState.currentWindow) loadedState.currentWindow = '1';
-                
+                if (!loadedState.sortBy) loadedState.sortBy = 'sku';
+                if (!loadedState.currentWindow) loadedState.currentWindow = '1';
+
                 state = loadedState;
-                
+
                 const winRadio = document.getElementById(`v${state.currentWindow}`);
                 if (winRadio) winRadio.checked = true;
-                
+
                 document.getElementById(`sort-${state.sortBy === 'sku' ? 'sku' : 'ords'}`).checked = true;
             }
         }
@@ -336,10 +384,10 @@
         function showToast(message, type = 'success') {
             const toastEl = document.getElementById('actionToast');
             const toastBody = document.getElementById('toastMessage');
-            
+
             toastEl.className = `toast align-items-center text-white bg-${type} border-0 shadow`;
             toastBody.textContent = message;
-            
+
             const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
             toast.show();
         }
@@ -355,7 +403,7 @@
                         totalSku += entry.sku;
                         totalOrds += 1;
                     }
-                } 
+                }
                 // Si se pide una ventana específica
                 else if (entry.window.toString() === win.toString()) {
                     totalSku += entry.sku;
@@ -378,17 +426,17 @@
 
             saveState();
             nameInput.value = '';
-            
+
             const modal = bootstrap.Modal.getInstance(document.getElementById('addPickerModal'));
             modal.hide();
-            
+
             renderPickers();
             showToast(`Picker ${name} añadido.`);
         }
 
         function promptDeletePicker(id) {
             const picker = state.pickers.find(p => p.id === id);
-            if(picker && confirm(`¿Seguro que deseas eliminar a ${picker.name} de la lista?`)) {
+            if (picker && confirm(`¿Seguro que deseas eliminar a ${picker.name} de la lista?`)) {
                 state.pickers = state.pickers.filter(p => p.id !== id);
                 saveState();
                 renderPickers();
@@ -399,7 +447,7 @@
         function addSKUs(pickerId) {
             const input = document.getElementById(`input-${pickerId}`);
             const val = parseInt(input.value);
-            
+
             if (isNaN(val) || val <= 0) {
                 input.style.borderColor = '#dc3545';
                 input.style.backgroundColor = '#fff8f8';
@@ -418,12 +466,12 @@
                     sku: val,
                     timestamp: Date.now()
                 });
-                
+
                 saveState();
                 input.value = '';
                 renderPickers();
-                
-                input.blur(); 
+
+                input.blur();
                 showToast(`+${val} SKUs (1 ord) a ${picker.name}`);
             }
         }
@@ -431,7 +479,7 @@
         function changeWindow(win) {
             state.currentWindow = win;
             saveState();
-            renderPickers(); 
+            renderPickers();
         }
 
         function changeSort(method) {
@@ -441,7 +489,7 @@
         }
 
         function resetDay() {
-            if(confirm("⚠️ ¿Estás seguro de reiniciar el día?\n\n- Se borrarán las ventanas 1 a 4.\n- Lo que esté en 'Pre' pasará al historial de hoy como 'ANT' (Anterior).")) {
+            if (confirm("⚠️ ¿Estás seguro de reiniciar el día?\n\n- Se borrarán las ventanas 1 a 4.\n- Lo que esté en 'Pre' pasará al historial de hoy como 'ANT' (Anterior).")) {
                 state.pickers.forEach(p => {
                     // Filtrar solo las que son 'pre'
                     const preHistory = p.history.filter(h => h.window === 'pre');
@@ -463,11 +511,21 @@
         }
 
         // --- HISTORY & NOTES LOGIC ---
+        function togglePartTime(pickerId) {
+            const picker = state.pickers.find(p => p.id === pickerId);
+            if (picker) {
+                picker.isPartTime = !picker.isPartTime;
+                saveState();
+                renderPickers();
+                showToast(`${picker.name} ahora es ${picker.isPartTime ? 'Part Time' : 'Full Time'}.`, 'secondary');
+            }
+        }
+
         function editPickerNote(pickerId) {
             const picker = state.pickers.find(p => p.id === pickerId);
             if (picker) {
                 const currentNote = picker.notes || '';
-                const newNote = prompt(`Notas para ${picker.name} (ej: llegó tarde, part time):\nDejar en blanco para borrar la nota.`, currentNote);
+                const newNote = prompt(`Notas para ${picker.name} (ej: llegó tarde, no maneja):\nDejar en blanco para borrar la nota.`, currentNote);
                 if (newNote !== null) {
                     picker.notes = newNote.trim();
                     saveState();
@@ -485,17 +543,17 @@
             list.innerHTML = '';
 
             let windowCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 'pre': 0, 'ANT': 0 };
-            
+
             if (picker.history.length === 0) {
                 list.innerHTML = `<li class="list-group-item text-center text-muted p-4">No hay órdenes registradas aún.</li>`;
             } else {
                 const sortedHistory = [...picker.history].sort((a, b) => b.timestamp - a.timestamp);
-                
+
                 sortedHistory.forEach(entry => {
                     const isEntryPre = entry.window === 'pre';
                     const isEntryAnt = entry.window === 'ANT';
-                    const timeStr = new Date(entry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    
+                    const timeStr = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
                     let badgeLabel = 'V' + entry.window;
                     let badgeClass = 'bg-primary';
                     if (isEntryPre) { badgeLabel = 'PRE'; badgeClass = 'bg-secondary'; }
@@ -523,16 +581,16 @@
         }
 
         function deleteHistoryEntry(pickerId, historyId) {
-            if(confirm("¿Borrar esta orden del historial?")) {
+            if (confirm("¿Borrar esta orden del historial?")) {
                 const picker = state.pickers.find(p => p.id === pickerId);
                 if (picker) {
                     picker.history = picker.history.filter(h => h.id !== historyId);
                     saveState();
                     renderPickers();
-                    
+
                     const modal = bootstrap.Modal.getInstance(document.getElementById('historyModal'));
                     if (modal) modal.hide();
-                    
+
                     showToast('Orden eliminada del historial.', 'secondary');
                 }
             }
@@ -563,7 +621,7 @@
                         if (h.window !== 'pre') {
                             const hWin = h.window === 'ANT' ? 0 : parseInt(h.window);
                             const currentWin = parseInt(win);
-                            
+
                             if (hWin < currentWin) {
                                 prevTotal += h.sku;
                                 newTotal += h.sku;
@@ -582,13 +640,13 @@
                 if (!isPre && (parseInt(win) > 1 || p.prevTotal > 0)) {
                     line += `${p.prevTotal}. `;
                 }
-                
+
                 if (p.currentOrders.length > 0) {
                     line += p.currentOrders.join('+') + '+ ';
                 } else {
                     line += '0+ ';
                 }
-                
+
                 line += `${p.newTotal}`;
                 text += line + '\n\n';
             });
@@ -607,7 +665,7 @@
             const textarea = document.getElementById('summaryTextarea');
             textarea.select();
             textarea.setSelectionRange(0, 99999);
-            
+
             navigator.clipboard.writeText(textarea.value).then(() => {
                 showToast('¡Resumen copiado al portapapeles!');
             }).catch(err => {
@@ -620,7 +678,7 @@
         function renderPickers() {
             const container = document.getElementById('pickers-container');
             container.innerHTML = '';
-            
+
             const isPre = state.currentWindow === 'pre';
 
             if (state.pickers.length === 0) {
@@ -634,7 +692,20 @@
                 return;
             }
 
-            const decoratedPickers = state.pickers.map(p => {
+            const visiblePickersList = state.pickers.filter(p => !(p.isPartTime && state.currentWindow === '4'));
+
+            if (visiblePickersList.length === 0 && state.pickers.length > 0) {
+                container.innerHTML = `
+                    <div class="text-center mt-5 text-muted p-4 bg-white rounded shadow-sm border">
+                        <i class="bi bi-cup-hot" style="font-size: 3.5rem; color:#adb5bd;"></i>
+                        <h5 class="mt-3 fw-bold text-secondary">Descanso</h5>
+                        <p class="mt-2 small">Los pickers activos son Part Time y no participan en la ventana 4.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const decoratedPickers = visiblePickersList.map(p => {
                 const total = getPickerMetrics(p); // V1-V4 solo
                 const current = getPickerMetrics(p, state.currentWindow); // V actual o Pre
                 return { ...p, totalMetrics: total, currentMetrics: current };
@@ -644,7 +715,7 @@
                 // If PRE, sum totalMetrics + currentMetrics to balance workload based on everything done today
                 // If V1-V4, base the ranking just on 'totalMetrics' (day totals so far)
                 const getCombined = (p) => isPre ? { sku: p.totalMetrics.sku + p.currentMetrics.sku, ords: p.totalMetrics.ords + p.currentMetrics.ords } : p.totalMetrics;
-                
+
                 const aMetrics = getCombined(a);
                 const bMetrics = getCombined(b);
 
@@ -669,9 +740,9 @@
                 const isSortSku = state.sortBy === 'sku';
                 const metricsToUse = isPre ? { sku: picker.totalMetrics.sku + picker.currentMetrics.sku, ords: picker.totalMetrics.ords + picker.currentMetrics.ords } : picker.totalMetrics;
                 const mainVal = isSortSku ? metricsToUse.sku : metricsToUse.ords;
-                
+
                 let percent = (mainVal / maxTotal) * 100;
-                
+
                 let colorClass = 'load-low';
                 if (mainVal > 0) {
                     if (percent > 85) colorClass = 'load-high';
@@ -691,6 +762,9 @@
                             <div style="max-width: 55%;">
                                 <div class="d-flex align-items-center flex-wrap">
                                     <div class="picker-name text-truncate" onclick="promptDeletePicker('${picker.id}')" title="Toca para eliminar">${picker.name}</div>
+                                    <span class="badge ${picker.isPartTime ? 'bg-warning text-dark' : 'bg-light text-secondary border'} ms-2 shadow-sm" style="font-size:0.55rem; cursor:pointer; align-self: center;" onclick="togglePartTime('${picker.id}')" title="Toca para cambiar modalidad">
+                                        ${picker.isPartTime ? 'PT' : 'FT'}
+                                    </span>
                                     <button class="history-btn ms-2" onclick="editPickerNote('${picker.id}')" title="Editar Notas" style="color: #6c757d; font-size: 0.9rem;"><i class="bi bi-journal-text"></i></button>
                                     <button class="history-btn" onclick="openHistoryModal('${picker.id}')" title="Ver Historial"><i class="bi bi-clock-history"></i></button>
                                     ${badgeHtml}
@@ -726,4 +800,5 @@
         });
     </script>
 </body>
+
 </html>
